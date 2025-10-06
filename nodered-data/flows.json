@@ -1,0 +1,78 @@
+[
+    {
+        "id": "d5ce7cbacb63460e",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "151932c3e1481c69",
+        "type": "mqtt-broker",
+        "name": "raspberrypi",
+        "broker": "mosquitto",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "103cc3ed14190b0b",
+        "type": "debug",
+        "z": "d5ce7cbacb63460e",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "1dd8a32bb29c558a",
+        "type": "mqtt in",
+        "z": "d5ce7cbacb63460e",
+        "name": "",
+        "topic": "test",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "151932c3e1481c69",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 330,
+        "y": 180,
+        "wires": [
+            [
+                "103cc3ed14190b0b"
+            ]
+        ]
+    }
+]

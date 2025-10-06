@@ -1,0 +1,7 @@
+# Mosquitto runtime
+mosquitto/data/
+mosquitto/log/
+
+# Node-RED runtime
+nodered-data/node_modules/
+
