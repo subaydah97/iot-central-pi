@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: mosquitto
+    restart: always
+    ports:
+      - "1883:1883"   # MQTT plain
+      - "9001:9001"   # WebSocket (optioneel)
+    volumes:
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+      - ./mosquitto/config:/mosquitto/config
+
+  nodered:
+    image: nodered/node-red:latest
+    container_name: nodered
+    restart: always
+    ports:
+      - "1880:1880"
+    volumes:
+      - ./nodered/data:/data
+      - ./nodered/settings.js:/data/settings.js  # Mount het bestaande settings.js
+    environment:
+      - NODE_RED_ENABLE_PROJECTS=true
+      - MQTT_BROKER_HOST=mosquitto
+      - MQTT_BROKER_PORT=1883
+    user: "1000:1000"  # Zorgt dat Node-RED schrijfrechten heeft op /data
