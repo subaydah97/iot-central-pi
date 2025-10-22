@@ -39,17 +39,6 @@
         "sessionExpiry": ""
     },
     {
-        "id": "47d0018b4d3ed110",
-        "type": "ui_group",
-        "name": "EPC 1522",
-        "tab": "82a2d34084d5df9c",
-        "order": 1,
-        "disp": true,
-        "width": 6,
-        "collapse": false,
-        "className": ""
-    },
-    {
         "id": "fa04f581a13e65a0",
         "type": "ui_tab",
         "name": "Home",
@@ -163,11 +152,30 @@
         "hidden": false
     },
     {
+        "id": "47d0018b4d3ed110",
+        "type": "ui_group",
+        "name": "EPC 1522",
+        "tab": "82a2d34084d5df9c",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "53abf6c184c73a84",
+        "type": "Stackhero-InfluxDB-v2-Server",
+        "name": "sensordata1",
+        "host": "xxxxxx.stackhero-network.com",
+        "port": "443",
+        "tls": true
+    },
+    {
         "id": "c4f53879b24db221",
         "type": "mqtt in",
         "z": "0640382a26916dce",
         "name": "",
-        "topic": "epc1522/data",
+        "topic": "bridge1522/data",
         "qos": "0",
         "datatype": "auto-detect",
         "broker": "6a63cecc4e4c16a4",
@@ -175,7 +183,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 210,
+        "x": 220,
         "y": 280,
         "wires": [
             [
@@ -196,8 +204,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 460,
-        "y": 380,
+        "x": 660,
+        "y": 360,
         "wires": []
     },
     {
@@ -210,21 +218,21 @@
         "width": 0,
         "height": 0,
         "gtype": "gage",
-        "title": "temperature",
+        "title": "voltage",
         "label": "units",
-        "format": "{{msg.payload.temperature}}",
+        "format": "{{msg.payload.voltage}}",
         "min": 0,
-        "max": "40",
+        "max": "5",
         "colors": [
-            "#f1c5f1",
-            "#b3dcea",
+            "#00d134",
+            "#df6e11",
             "#ca3838"
         ],
         "seg1": "",
         "seg2": "",
         "diff": false,
         "className": "",
-        "x": 570,
+        "x": 560,
         "y": 280,
         "wires": []
     },
