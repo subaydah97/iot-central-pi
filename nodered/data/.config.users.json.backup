@@ -6,7 +6,7 @@
                 "view-store-position": false,
                 "view-show-grid": true,
                 "view-snap-grid": true,
-                "view-grid-size": 20,
+                "view-grid-size": "20",
                 "view-node-status": true,
                 "view-node-info-icon": true,
                 "view-node-show-label": true,
@@ -15,6 +15,20 @@
             },
             "tours": {
                 "welcome": "4.1.0"
+            },
+            "dialog": {
+                "export": {
+                    "pretty": true
+                }
+            }
+        },
+        "git": {
+            "user": {
+                "name": "",
+                "email": ""
+            },
+            "workflow": {
+                "mode": "manual"
             }
         }
     }
