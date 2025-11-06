@@ -4,5 +4,9 @@ mosquitto/log/
 
 # Node-RED runtime
 nodered-data/node_modules/
-
 nodered-data/.npm
+
+# Python folder: Influx CLI and tarball
+python/influx
+python/influxdb2-client-*.tar.gz
+python/LICENSE
