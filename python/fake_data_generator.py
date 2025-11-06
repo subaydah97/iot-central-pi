@@ -21,12 +21,13 @@ while True:
         "voltage": round(random.uniform(215.0, 245.0), 4),     # V
         "current": round(random.uniform(1.0, 10.0), 3),        # A
         "power": round(random.uniform(100.0, 2000.0), 3),      # W
-        # Boolean statuses
-        "vibration": random.choice([True, False]),
-        "gasStatus": random.choice([True, False]),
-        "doorStatus": random.choice([True, False]),
-        # Numeric magnetic field (e.g., 20–60 μT)
-        "magneticField": random.randint(20, 60)
+
+        # Boolean statuses (influx)
+	"vibration": random.choice([True, False]),
+	"gasStatus": random.choice([True, False]),
+	"doorStatus": random.choice([True, False]),
+	"magneticField": random.choice([True, False])
+
     }
 
     # Create an InfluxDB point
@@ -37,5 +38,5 @@ while True:
     # Write the point to InfluxDB
     write_api.write(bucket=INFLUX_BUCKET, org=INFLUX_ORG, record=point)
 
-    print(f"✅ Fake data written: {data}")
+    print(f"Fake data written: {data}")
     time.sleep(5)
