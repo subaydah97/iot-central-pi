@@ -13,10 +13,10 @@ Dit project realiseert een industriële IIoT-hub bestaande uit een **Edge Proces
   - Grafana visualiseert realtime en historische sensorwaarden.
 
 ## Dataflow
-1. Sensor → **MQTT** → EPC  
+1. Sensor → **MQTT** → EPC → uitlezen oo Node-RED
 2. EPC verwerkt data lokaal (edge logic)  
 3. EPC → MQTT bridge → Raspberry Pi  
-4. Pi Node-RED → **InfluxDB**  
+4. Raspberry pi → **InfluxDB**  
 5. Grafana dashboard toont grafieken en status  
 
 ## Doel van de opdracht
