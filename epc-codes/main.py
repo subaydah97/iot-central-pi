@@ -2,75 +2,139 @@ import time
 import json
 import paho.mqtt.client as mqtt
 
-# -------------------------------
 # MQTT setup
-# -------------------------------
-BROKER = "localhost"          # EPC local broker
+BROKER = "localhost"
 TOPIC_SUB = "bridge1522/data"
-TOPIC_PUB = "epc1522/data"
 
-client = mqtt.Client()
+TOPIC_BATCH = "epc1522/batch"
+TOPIC_ALERTS = "epc1522/alerts"
+
+client = mqtt.Client(client_id="epc_edge")
 client.connect(BROKER, 1883, 60)
 
-# -------------------------------
-# Buffers for batching numeric sensors
-# -------------------------------
+# Buffers (6 values = 1 minute)
 buffers = {
-    "sensor1_temp": [],
-    "sensor1_pressure": [],
-    "sensor1_humidity": [],
-    "sensor2_power": []
+    "temperature": [],
+    "humidity": [],
+    "pressure": [],
+    "voltage": [],
+    "current": [],
+    "power": []
 }
 
-# -------------------------------
+# Thresholds
+THRESHOLDS = {
+    "temperature": {"warn": 40.0, "crit": 45.0},
+    "humidity": {"warn": 65.0, "crit": 70.0},
+    "pressure": {"warn": 100000.0, "crit": 105000.0},
+    "voltage": {"warn": 2.0, "crit": 0.5},
+    "current": {"warn": 2.0, "crit": 0.2},
+    "power": {"warn": 2.5, "crit": 0.5}
+}
+
+# Utility
+def average(values):
+    return sum(values) / len(values)
+
+def send_alert(alert, severity):
+    client.publish(TOPIC_ALERTS, json.dumps({
+        "alert": alert,
+        "severity": severity,
+        "timestamp": int(time.time())
+    }))
+
+# Door state
+door_open_time = None
+door_alert_sent = False   # <<< ADDED
+
 # MQTT callback
-# -------------------------------
 def on_message(client, userdata, msg):
+    global door_open_time, door_alert_sent
+
     try:
         data = json.loads(msg.payload.decode())
     except Exception as e:
         print("JSON decode error:", e)
         return
 
-    # SENSOR 1: Temperature / Pressure / Humidity
+    # ---------- Sensor 1 ----------
     if "temperature" in data:
-        buffers["sensor1_temp"].append(data["temperature"])
-        buffers["sensor1_pressure"].append(data["pressure"])
-        buffers["sensor1_humidity"].append(data["humidity"])
+        buffers["temperature"].append(data["temperature"])
+        buffers["humidity"].append(data["humidity"])
+        buffers["pressure"].append(data["pressure"])
 
-    # SENSOR 2: Voltage / Current / Power
+    # ---------- Sensor 2 ----------
     if "voltage" in data:
-        buffers["sensor2_power"].append(data)
+        buffers["voltage"].append(data["voltage"])
+        buffers["current"].append(data["current"])
+        buffers["power"].append(data["power"])
 
-    # Boolean sensors (3-6) — just forward as is (optional)
-    boolean_keys = ["vibration", "magneticField", "gasStatus", "doorStatus"]
-    if any(k in data for k in boolean_keys):
-        client.publish(TOPIC_PUB, json.dumps(data))
+    # ---------- Event sensors ----------
+    if data.get("vibration"):
+        send_alert("UNEXPECTED_VIBRATION", "CRITICAL")
 
-# -------------------------------
-# Start MQTT subscription
-# -------------------------------
+    if data.get("magneticField"):
+        send_alert("UNAUTHORIZED_ACCESS", "CRITICAL")
+
+    if data.get("gasStatus"):
+        send_alert("GAS_LEAK_DETECTED", "CRITICAL")
+
+    # ---------- Door logic (ANTI-SPAM) ----------
+    if "doorStatus" in data:
+        if data["doorStatus"] is True:
+            if door_open_time is None:
+                door_open_time = time.time()
+                door_alert_sent = False
+            elif time.time() - door_open_time > 10 and not door_alert_sent:
+                send_alert("DOOR_OPEN_TOO_LONG", "WARNING")
+                door_alert_sent = True
+        else:
+            door_open_time = None
+            door_alert_sent = False
+
+
+# Start MQTT
 client.on_message = on_message
 client.subscribe(TOPIC_SUB)
 client.loop_start()
 
-# -------------------------------
-# Main loop: batch processing every 1 minute
-# -------------------------------
-BATCH_INTERVAL = 60  # seconds
-
+# Batch loop (1 minute)
 while True:
-    time.sleep(BATCH_INTERVAL)
+    time.sleep(60)
 
-    # SENSOR 1: batch
-    for key in ["sensor1_temp", "sensor1_pressure", "sensor1_humidity"]:
-        if buffers[key]:
-            batch_data = buffers[key].copy()
+    batch = {"timestamp": int(time.time())}
+
+    for key in buffers:
+        if len(buffers[key]) >= 6:
+            avg = round(average(buffers[key]), 2)
+            batch[key] = avg
             buffers[key].clear()
-            client.publish(TOPIC_PUB, json.dumps({key: batch_data}))
 
-    # SENSOR 2: batch
-    if buffers["sensor2_power"]:
-        batch = buffers["sensor2_power"].copy()
-        buffers["sensor2_power"].clear()
-        client.publish(TOPIC_PUB, json.dumps({"sensor2_power_batch": batch}))
+            warn = THRESHOLDS[key]["warn"]
+            crit = THRESHOLDS[key]["crit"]
+
+            if warn and (
+                (key in ["temperature", "humidity", "pressure"] and avg >= warn) or
+                (key in ["voltage", "current", "power"] and avg <= warn)
+            ):
+                send_alert(
+                    "POSSIBLE_POWER_OUTAGE" if key in ["voltage", "current", "power"]
+                    else f"POSSIBLE_{key.upper()}_ISSUE",
+                    "WARNING"
+                )
+
+            if crit and (
+                (key in ["temperature", "humidity", "pressure"] and avg >= crit) or
+                (key in ["voltage", "current", "power"] and avg <= crit)
+            ):
+                send_alert(
+                    "POWER_OUTAGE" if key in ["voltage", "current", "power"]
+                    else f"{key.upper()}_CRITICAL",
+                    "CRITICAL"
+                )
+
+    if len(batch) > 1:
+        client.publish(TOPIC_BATCH, json.dumps(batch))
+
+        print("Published batch:", batch)
+
