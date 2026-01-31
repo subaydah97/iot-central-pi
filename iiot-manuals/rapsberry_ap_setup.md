@@ -1,18 +1,8 @@
 # Raspberry Pi 5 – Access Point (AP) Setup Guide
 
-Deze handleiding beschrijft stap voor stap hoe de **Raspberry Pi 5** wordt ingericht als **Wi‑Fi Access Point (AP)**, met **NAT**, zodat aangesloten apparaten internet hebben via **Ethernet**.
-
-Daarnaast wordt uitgelegd hoe deze setup samenwerkt met de **EPC1522** en een **MQTT broker**.
+Deze handleiding beschrijft stap voor stap hoe de **Raspberry Pi 5** wordt ingericht als **Wi‑Fi Access Point (AP)**, zodat aangesloten apparaten internet hebben
 
 ---
-
-## Overzicht
-
-* Raspberry Pi 5 draait als **Wi‑Fi Access Point**
-* Ethernet wordt gebruikt als **uplink naar internet**
-* Wi‑Fi clients krijgen IP-adressen via **dnsmasq**
-* Verkeer wordt gerouteerd via **NAT (iptables)**
-* MQTT-communicatie tussen **EPC1522 ↔ Raspberry Pi** werkt via het AP-netwerk
 
 **Netwerkvoorbeeld:**
 
