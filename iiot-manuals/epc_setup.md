@@ -288,7 +288,7 @@ Hiermee weet je dat de lokaal draaiende Mosquitto broker berichten kan ontvangen
 
 **Samengevat: Je hebt nu een Mosquitto broker en een dummy_container draaiend op de EPC1522, volledig lokaal. De broker is klaar om berichten te ontvangen en te publiceren.
 > **Opmerking:**  
-> Volg de raspberrypi_setup.md tot en met stap ....? om vervolgens verder te gaan met het testen van de bridge voor communicatie tussen de epc1522 en de Raspberry Pi 5
+> Volg de raspberrypi_setup.md tot en met stap 10 om vervolgens verder te gaan met het testen van de bridge voor communicatie tussen de epc1522 en de Raspberry Pi 5
 ---
 # 8. bridge tussen 2 brokers
 
@@ -302,24 +302,25 @@ nano ~/mosquitto/config/mosquitto.conf
 ### 8.2 Pas de configuratie aan voor bridging
 
 ```bash
-# === Lokale broker-instellingen ===
-listener 1883
-allow_anonymous true
-persistence true
-persistence_location /mosquitto/data/
+listener 8883
+allow_anonymous false
+password_file /mosquitto/config/passwd
 
-# === Logging ===
-log_dest file /mosquitto/log/mosquitto.log
-
-# === Bridge naar Raspberry Pi broker ===
 connection bridge_to_pi
-address 172.20.10.3:1883 # Dit is het IP-adres van de Raspberry Pi broker, waarop Mosquitto draait.
+address 10.10.10.1:1883
 
-# Stuur alle EPC-data (bridge1522/#) naar de Pi
-topic bridge1522/# out 0
+#  Ruwe data NIET doorsturen
+# topic bridge1522/# out
 
-# Ontvang eventueel terug van de Pi (epc1522/#)
-topic epc1522/# in 0 # dit is de topic op de rapsberry pi. 
+#  Alleen gebatchte data naar Raspberry Pi
+topic epc1522/batch out
+
+# (optioneel) commando’s of config terug van Pi
+topic epc1522/cmd in
+
+start_type automatic
+notifications false
+try_private false
 ```
 > Opslaan met CTRL + O, afsluiten met CTRL + X.
 
@@ -336,3 +337,18 @@ Controleer of de bridge actief is met:
 ```bash
 docker logs mosquitto
 ```
+> Of controleer of the bridge met de raspberry pi actied is met de installatie van Node red
+
+- MQTT-in nodes tonen inkomende berichten van de EPC
+- MQTT-out nodes kunnen testcommando’s terugsturen
+- Dit is vooral handig voor debugging tijdens de ontwikkelfase.
+
+# 9 Python scripts uitvoeren voor edge computing 
+
+
+De EPC1522 kan edge computing uitvoeren met de Python scripts die in de repository zijn opgenomen, zoals:
+#### main.py: edge computing logica 
+#### epc_data.py:  generen van data om edge computing te testen. 
+
+**Opmerking** Volg hierna de raspberrypi_setup.md verder
+
